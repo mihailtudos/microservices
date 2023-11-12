@@ -1,0 +1,16 @@
+POST http://localhost:8080/
+Content-Type: application/json
+
+{"name":  "Tea", "price":  2.11, "sku":  "aaa-aaa-aaaa"}
+
+###
+GET http://localhost:8080/
+Accept: application/json
+
+###
+
+PUT http://localhost:8080/3
+Content-Type: application/json
+
+{"name":  "Gold Tea", "price":  2.11, "sku":  "aaa-aaa-aaaa"}
+###
