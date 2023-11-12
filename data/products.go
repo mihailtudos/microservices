@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Product defines the structure for an API product
 type Product struct {
 	ID          int     `json:"id"`
 	Name        string  `json:"name"`
@@ -17,17 +18,24 @@ type Product struct {
 	DeletedOn   string  `json:"-"`
 }
 
+// Products is a collection of Product
 type Products []*Product
 
+// ToJSON serializes the contents of the collection to JSON
 func (p *Products) ToJSON(w io.Writer) error {
+	// NewEncoder provides better performance than json.Marshal as it does not
+	// have to buffer the output into a slice of bytes.
+	// This reduces allocations and the overheads of the service
 	e := json.NewEncoder(w)
 	return e.Encode(p)
 }
 
+// GetProducts returns a list of products
 func GetProducts() Products {
 	return productList
 }
 
+// productList is a Hard coded list of products for this data structure
 var productList = []*Product{
 	&Product{
 		ID:          1,

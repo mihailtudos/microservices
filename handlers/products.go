@@ -23,7 +23,14 @@ func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		p.getProducts(w, r)
 		return
-	} else if r.Method == http.MethodPut {
+	}
+
+	if r.Method == http.MethodPost {
+		p.addProduct(w, r)
+		return
+	}
+
+	if r.Method == http.MethodPut {
 		p.updateProduct(w, r)
 		return
 	}
@@ -51,4 +58,11 @@ func (p *Products) getProducts(w http.ResponseWriter, r *http.Request) {
 // updateProduct updates a product to the received body
 func (p *Products) updateProduct(w http.ResponseWriter, r *http.Request) {
 	p.l.Printf("\n\n%#v\n\n", strings.Split(r.URL.Path, "/products/"))
+}
+
+// updateProduct updates a product to the received body
+func (p *Products) addProduct(w http.ResponseWriter, r *http.Request) {
+	p.l.Println("Handle POST Product")
+
+	
 }
