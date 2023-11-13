@@ -1,118 +1,55 @@
-// Package handlers classification of Product API
-//
-// # Documentation for Product API
-//
-// Schemes: http
-// BasePath: /
-// Version: 1.0.0
-//
-// Consumes:
-// - applications/json
-//
-// Produces:
-// - application/json
-//
-// swagger:meta
 package handlers
 
 import (
-	"context"
 	"fmt"
+	"github.com/gorilla/mux"
+	"github.com/mihailtudos/microservices/data"
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
-	"github.com/mihailtudos/microservices/data"
 )
 
-// Products is a http.Handler
+// KeyProduct is a key used for the Product object in the context
+type KeyProduct struct{}
+
+// Products handler for handling products
 type Products struct {
 	l *log.Logger
+	v *data.Validation
 }
 
 // NewProducts creates a products handler with the given logger
-func NewProducts(l *log.Logger) *Products {
-	return &Products{l}
+func NewProducts(l *log.Logger, v *data.Validation) *Products {
+	return &Products{l, v}
 }
 
-// GetProducts returns the products from the data store
-func (p *Products) GetProducts(w http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle GET Products")
+// ErrInvalidProductPath is an error message when the product path is not valid
+var ErrInvalidProductPath = fmt.Errorf("Invalid Path, path should be /products/[id]")
 
-	// fetch the products from the datastore
-	lp := data.GetProducts()
-
-	// set content-type header
-	w.Header().Add("Content-Type", "application/json")
-
-	// serialize the products list to JSON
-	err := lp.ToJSON(w)
-	if err != nil {
-		http.Error(w, "Unable to marshal json", http.StatusInternalServerError)
-	}
+// GenericError is a generic error message returned by a server
+type GenericError struct {
+	Message string `json:"message"`
 }
 
-// UpdateProduct updates a product to the received body
-func (p *Products) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+// ValidationError is a collection of validation error messages
+type ValidationError struct {
+	Messages []string `json:"messages"`
+}
+
+// getProductID returns the product ID from the URL
+// Panics if cannot convert the id into an integer
+// this should never happen as the router ensures that
+// this is a valid number
+func getProductID(r *http.Request) int {
+	// parse the product id from the url
 	vars := mux.Vars(r)
+
+	// convert the id into an integer and return
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		http.Error(w, "Invalid Id provided", http.StatusBadRequest)
+		// should never happen
+		panic(err)
 	}
 
-	p.l.Println("Handle PUT Product ", id)
-	prod := r.Context().Value(KeyProduct{}).(data.Product)
-
-	err = data.UpdateProduct(id, &prod)
-	if err == data.ErrProductNotFound {
-		http.Error(w, "Product not found", http.StatusNotFound)
-		return
-	}
-
-	if err != nil {
-		http.Error(w, "Product not found", http.StatusInternalServerError)
-		return
-	}
-}
-
-// AddProduct updates a product to the received body
-func (p *Products) AddProduct(w http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle POST Product")
-
-	prod := r.Context().Value(KeyProduct{}).(data.Product)
-	data.AddProduct(&prod)
-	w.WriteHeader(http.StatusCreated)
-}
-
-type KeyProduct struct{}
-
-// MiddlewareProductValidation validates the product in the request and calls next if ok
-func (p *Products) MiddlewareProductValidation(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		prod := data.Product{}
-
-		err := prod.FromJSON(r.Body)
-		if err != nil {
-			p.l.Println("[ERROR] deserializing product ", err)
-			http.Error(w, "Error reading product", http.StatusBadRequest)
-			return
-		}
-
-		// validate product
-		err = prod.Validate()
-		if err != nil {
-			p.l.Println("[ERROR] validating product ", err)
-			http.Error(w, fmt.Sprintf("Error validating product: %s", err.Error()), http.StatusUnprocessableEntity)
-			return
-		}
-
-		// add the product to the context
-		ctx := context.WithValue(r.Context(), KeyProduct{}, prod)
-		rwc := r.WithContext(ctx)
-
-		//Call the next handler, which can be another middleware in the chain,
-		// or the final handler.
-		next.ServeHTTP(w, rwc)
-	})
+	return id
 }
