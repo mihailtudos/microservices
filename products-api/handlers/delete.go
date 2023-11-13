@@ -9,7 +9,7 @@ import (
 // Returns a list of products
 //
 // responses:
-//		201: noContent
+//		201: noContentResponse
 //		404: errorResponse
 //		501: errorResponse
 

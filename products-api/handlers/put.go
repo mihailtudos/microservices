@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"github.com/mihailtudos/microservices/data"
+	data2 "github.com/mihailtudos/microservices/data"
 	"net/http"
 )
 
-// swagger:route PUT /products products updateProduct
+// swagger:route PUT /products/{id} products updateProduct
 // Update a products details
 //
 // responses:
@@ -17,15 +17,15 @@ import (
 func (p *Products) Update(rw http.ResponseWriter, r *http.Request) {
 
 	// fetch the product from the context
-	prod := r.Context().Value(KeyProduct{}).(data.Product)
+	prod := r.Context().Value(KeyProduct{}).(data2.Product)
 	p.l.Println("[DEBUG] updating record id", prod.ID)
 
-	err := data.UpdateProduct(prod)
-	if err == data.ErrProductNotFound {
+	err := data2.UpdateProduct(prod)
+	if err == data2.ErrProductNotFound {
 		p.l.Println("[ERROR] product not found", err)
 
 		rw.WriteHeader(http.StatusNotFound)
-		data.ToJSON(&GenericError{Message: "Product not found in database"}, rw)
+		data2.ToJSON(&GenericError{Message: "Product not found in database"}, rw)
 		return
 	}
 

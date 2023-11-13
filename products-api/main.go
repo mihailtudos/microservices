@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/mihailtudos/microservices/data"
+	"github.com/mihailtudos/microservices/handlers"
 	"github.com/nicholasjackson/env"
 	"log"
 	"net/http"
@@ -12,10 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/mihailtudos/microservices/handlers"
 )
-
-const PORT = "8080"
 
 var bindAddress = env.String("BIND_ADDRESS", false, ":8080", "Bind address for the server")
 

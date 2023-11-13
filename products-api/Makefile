@@ -9,3 +9,6 @@ swagger:
 	@echo ....
 
 	swagger generate spec -o ./swagger.yaml --scan-models
+
+swagger-client:
+	rm -rf sdk && mkdir sdk && cd sdk && swagger generate client -f ../swagger.yaml  -A product-api && cd ..

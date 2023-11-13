@@ -15,7 +15,9 @@
 // swagger:meta
 package handlers
 
-import "github.com/mihailtudos/microservices/data"
+import (
+	"github.com/mihailtudos/microservices/data"
+)
 
 //
 // NOTE: Types defined here are purely for documentation purposes
@@ -67,7 +69,7 @@ type productParamsWrapper struct {
 	Body data.Product
 }
 
-// swagger:parameters updateProduct
+// swagger:parameters listSingleProduct deleteProduct updateProduct
 type productIDParamsWrapper struct {
 	// The id of the product for which the operation relates
 	// in: path

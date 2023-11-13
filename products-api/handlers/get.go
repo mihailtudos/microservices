@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/mihailtudos/microservices/data"
+	data2 "github.com/mihailtudos/microservices/data"
 	"net/http"
 )
 
@@ -15,10 +15,11 @@ func (p *Products) ListAll(w http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle GET Products")
 
 	// fetch the products from the datastore
-	lp := data.GetProducts()
+	lp := data2.GetProducts()
 
 	// set content-type header
 	w.Header().Add("Content-Type", "application/json")
+	w.Header().Set("Allow", "GET")
 
 	// serialize the products list to JSON
 	err := lp.ToJSON(w)
@@ -27,7 +28,7 @@ func (p *Products) ListAll(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// swagger:route GET /products/{id} products listSingle
+// swagger:route GET /products/{id} products listSingleProduct
 // Return a list of products from the database
 // responses:
 //	200: productResponse
@@ -38,28 +39,29 @@ func (p *Products) ListSingle(w http.ResponseWriter, r *http.Request) {
 	id := getProductID(r)
 	p.l.Println("[DEBUG] get record id", id)
 
-	prod, err := data.GetProductByID(id)
+	prod, err := data2.GetProductByID(id)
 
 	switch err {
 	case nil:
 
-	case data.ErrProductNotFound:
+	case data2.ErrProductNotFound:
 		p.l.Println("[ERROR] fetching product", err)
 
 		w.WriteHeader(http.StatusNotFound)
-		_ = data.ToJSON(&GenericError{Message: err.Error()}, w)
+		_ = data2.ToJSON(&GenericError{Message: err.Error()}, w)
 		return
 	default:
 		p.l.Println("[ERROR] fetching product", err)
 
 		w.WriteHeader(http.StatusInternalServerError)
-		_ = data.ToJSON(&GenericError{Message: err.Error()}, w)
+		_ = data2.ToJSON(&GenericError{Message: err.Error()}, w)
 		return
 	}
 
 	// set content-type header
+	w.Header().Set("Allow", "GET")
 	w.Header().Add("Content-Type", "application/json")
-	err = data.ToJSON(prod, w)
+	err = data2.ToJSON(prod, w)
 	if err != nil {
 		// we should never be here but log the error
 		p.l.Println("[ERROR] serializing product", err)
