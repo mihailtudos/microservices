@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/mihailtudos/microservices/data"
+	"github.com/nicholasjackson/env"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +17,11 @@ import (
 
 const PORT = "8080"
 
+var bindAddress = env.String("BIND_ADDRESS", false, ":8080", "Bind address for the server")
+
 func main() {
+	_ = env.Parse()
+
 	l := log.New(os.Stdout, "products-api ", log.LstdFlags)
 	v := data.NewValidation()
 
@@ -50,7 +55,7 @@ func main() {
 
 	// create a new server
 	s := &http.Server{
-		Addr:         ":" + PORT,        // configure the bind address
+		Addr:         *bindAddress,      // configure the bind address
 		Handler:      sm,                // set the default handler
 		ErrorLog:     l,                 // set the logger for the server
 		ReadTimeout:  5 * time.Second,   // max time to read request from the client
@@ -60,7 +65,7 @@ func main() {
 
 	// start the server in a goroutine to allow the graceful shutdown setup
 	go func() {
-		l.Printf("Starting server on port %s", PORT)
+		l.Printf("Starting server on port %s", *bindAddress)
 
 		err := s.ListenAndServe()
 		if err != nil {
