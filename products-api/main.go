@@ -45,6 +45,8 @@ func main() {
 	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
 	deleteRouter.HandleFunc("/products/{id:[0-9]+}", ph.DeleteProduct)
 
+	//CORS
+	sm.Use(ph.CorsMiddleware)
 	// handler for documentation
 	ops := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
 	sh := middleware.Redoc(ops, nil)
