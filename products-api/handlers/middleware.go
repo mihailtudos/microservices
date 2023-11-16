@@ -60,7 +60,7 @@ func (p *Products) CorsMiddleware(next http.Handler) http.Handler {
 
 func isValidOrigin(origin string) bool {
 	// Check if the origin is in the list of allowed origins
-	allowedOrigins := []string{"http://localhost:8081"}
+	allowedOrigins := []string{"http://localhost:8081", "http://localhost:5173"}
 	for _, allowedOrigin := range allowedOrigins {
 		if origin == allowedOrigin {
 			return true

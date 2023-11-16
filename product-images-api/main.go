@@ -19,7 +19,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&addr, "BIND_ADDRESS", ":8080", "HTTP binging address")
+	flag.StringVar(&addr, "BIND_ADDRESS", ":9090", "HTTP binging address")
 	flag.StringVar(&logLevel, "LOG_LEVEL", "debug", "Log output level for the server [debug, info, trace]")
 	flag.StringVar(&basePath, "BASE_PATH", "./filestorage", "Base path to save images")
 }
@@ -43,10 +43,13 @@ func main() {
 	sm := mux.NewRouter()
 
 	ph := sm.Methods(http.MethodPost).Subrouter()
-	ph.HandleFunc("/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", fh.ServeHTTP)
+	ph.HandleFunc("/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", fh.UploadRest)
+	ph.HandleFunc("/images/{id:[0-9]+}", fh.UploadMultiPart)
 
 	gh := sm.Methods(http.MethodGet).Subrouter()
 	gh.Handle("/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", http.StripPrefix("/images/", http.FileServer(http.Dir(basePath))))
+
+	sm.Use(fh.CorsMiddleware)
 
 	s := http.Server{
 		Addr:         addr,
